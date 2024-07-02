@@ -448,10 +448,11 @@ int sys_ipc_try_send(u_int envid, u_int value, u_int srcva, u_int perm) {
 
 // XXX: kernel does busy waiting here, blocking all envs
 int sys_cgetc(void) {
-	int ch;
-	while ((ch = scancharc()) == 0) {
-	}
-	return ch;
+	// int ch;
+	// while ((ch = scancharc()) == 0) {
+	// }
+	// return ch;
+    return scancharc();
 }
 
 /* Overview:
@@ -538,7 +539,26 @@ int sys_read_dev(u_int va, u_int pa, u_int len) {
     memcpy((void *)va, (void *)(KSEG1 | pa), len);
 	return 0;
 }
+int sys_is_monitor_activer() {
+    return change_monitor();
+}
 
+int sys_is_done(u_int env_id) {
+    return is_monitor_done(env_id);
+}
+
+int sys_add_monitor(u_int env_id, char *str) {
+    return add_monitor(env_id, str);
+}
+
+u_int sys_get_monitor_id(u_int env_id) {
+    return get_monitor_id(env_id);
+}
+
+void sys_kill_job(int job_id) {
+    return kill_job(job_id);
+}
+ 
 void *syscall_table[MAX_SYSNO] = {
     [SYS_putchar] = sys_putchar,
     [SYS_print_cons] = sys_print_cons,
@@ -558,6 +578,11 @@ void *syscall_table[MAX_SYSNO] = {
     [SYS_cgetc] = sys_cgetc,
     [SYS_write_dev] = sys_write_dev,
     [SYS_read_dev] = sys_read_dev,
+    [SYS_is_monitor_activer] = sys_is_monitor_activer,
+    [SYS_is_done] = sys_is_done,
+    [SYS_add_monitor] = sys_add_monitor,
+    [SYS_get_monitor_id] = sys_get_monitor_id,
+    [SYS_kill_job] = sys_kill_job,
 };
 
 /* Overview:

@@ -1,5 +1,8 @@
 #include "serv.h"
 #include <mmu.h>
+#include <stdarg.h>
+#include <stddef.h>
+#include <stdint.h>
 
 struct Super *super;
 

@@ -14,7 +14,7 @@
 #define pages ((const volatile struct Page *)UPAGES)
 
 // libos
-void exit(void) __attribute__((noreturn));
+void exit(int) __attribute__((noreturn));
 
 extern const volatile struct Env *env;
 
@@ -68,6 +68,11 @@ int syscall_ipc_recv(void *dstva);
 int syscall_cgetc(void);
 int syscall_write_dev(void *va, u_int dev, u_int len);
 int syscall_read_dev(void *va, u_int dev, u_int len);
+int syscall_is_monitor_activer();
+int syscall_is_done(u_int env_id);
+int syscall_add_monitor(u_int env_id, char *str);
+u_int syscall_get_monitor_id(u_int env_id);
+void syscall_kill_job(int job_id);
 
 // ipc.c
 void ipc_send(u_int whom, u_int val, const void *srcva, u_int perm);
@@ -100,6 +105,7 @@ int fsipc_dirty(u_int, u_int);
 int fsipc_remove(const char *);
 int fsipc_sync(void);
 int fsipc_incref(u_int);
+int fsipc_create(const char *, u_int, struct Fd *);
 
 // fd.c
 int close(int fd);
@@ -118,6 +124,7 @@ int read_map(int fd, u_int offset, void **blk);
 int remove(const char *path);
 int ftruncate(int fd, u_int size);
 int sync(void);
+int create(const char *path, int mode);
 
 #define user_assert(x)                                                                             \
 	do {                                                                                       \
@@ -132,6 +139,7 @@ int sync(void);
 #define O_ACCMODE 0x0003 /* mask for above modes */
 #define O_CREAT 0x0100	 /* create if nonexistent */
 #define O_TRUNC 0x0200	 /* truncate to zero length */
+#define O_APPEND 0x0400  /* append to the file */
 
 // Unimplemented open modes
 #define O_EXCL 0x0400  /* error if already exists */

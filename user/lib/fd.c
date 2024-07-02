@@ -191,10 +191,12 @@ int read(int fdnum, void *buf, u_int n) {
 	// Step 1: Get 'fd' and 'dev' using 'fd_lookup' and 'dev_lookup'.
 	struct Dev *dev;
 	struct Fd *fd;
+    // debugf("1\n");
 	/* Exercise 5.10: Your code here. (1/4) */
     if ((r = fd_lookup(fdnum, &fd)) < 0 || (r = dev_lookup(fd->fd_dev_id, &dev)) < 0) {
 		return r;
 	}
+    // debugf("2\n");
 
 	// Step 2: Check the open mode in 'fd'.
 	// Return -E_INVAL if the file is opened for writing only (O_WRONLY).
@@ -202,10 +204,12 @@ int read(int fdnum, void *buf, u_int n) {
     if ((fd->fd_omode & O_ACCMODE) == O_WRONLY) {
 		return -E_INVAL;
 	}
+    // debugf("3\n");
 
 	// Step 3: Read from 'dev' into 'buf' at the seek position (offset in 'fd').
 	/* Exercise 5.10: Your code here. (3/4) */
     r = dev->dev_read(fd, buf, n, fd->fd_offset);
+    // debugf("4\n");
 
 	// Step 4: Update the offset in 'fd' if the read is successful.
 	/* Hint: DO NOT add a null terminator to the end of the buffer!
@@ -241,6 +245,8 @@ int write(int fdnum, const void *buf, u_int n) {
 	int r;
 	struct Dev *dev;
 	struct Fd *fd;
+    struct Stat ts;
+    
 
 	if ((r = fd_lookup(fdnum, &fd)) < 0 || (r = dev_lookup(fd->fd_dev_id, &dev)) < 0) {
 		return r;
@@ -249,6 +255,13 @@ int write(int fdnum, const void *buf, u_int n) {
 	if ((fd->fd_omode & O_ACCMODE) == O_RDONLY) {
 		return -E_INVAL;
 	}
+
+    if (O_APPEND && fd->fd_omode) {
+        try(dev->dev_stat(fd, &ts));
+        fd->fd_offset = ts.st_size;
+    }
+
+    // debugf("FUCK YOU!!!!\n");
 
 	r = dev->dev_write(fd, buf, n, fd->fd_offset);
 	if (r > 0) {
@@ -290,6 +303,7 @@ int stat(const char *path, struct Stat *stat) {
 	int fd, r;
 
 	if ((fd = open(path, O_RDONLY)) < 0) {
+        // debugf("1111111111\n");
 		return fd;
 	}
 

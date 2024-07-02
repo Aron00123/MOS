@@ -22,6 +22,11 @@ enum {
 	SYS_cgetc,
 	SYS_write_dev,
 	SYS_read_dev,
+    SYS_is_monitor_activer,
+    SYS_is_done,
+    SYS_add_monitor,
+    SYS_get_monitor_id,
+    SYS_kill_job,
 	MAX_SYSNO,
 };
 

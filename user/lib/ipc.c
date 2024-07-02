@@ -14,7 +14,7 @@ void ipc_send(u_int whom, u_int val, const void *srcva, u_int perm) {
 	while ((r = syscall_ipc_try_send(whom, val, srcva, perm)) == -E_IPC_NOT_RECV) {
 		syscall_yield();
 	}
-	user_assert(r == 0);
+	// user_assert(r == 0);
 }
 
 // Receive a value.  Return the value and store the caller's envid

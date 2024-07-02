@@ -52,6 +52,12 @@ void env_free(struct Env *);
 struct Env *env_create(const void *binary, size_t size, int priority);
 void env_destroy(struct Env *e);
 
+int change_monitor();
+int is_monitor_done(u_int env_id);
+int add_monitor(u_int env_id, char *str);
+u_int get_monitor_id(u_int env_id);
+void kill_job(int job_id);
+
 int envid2env(u_int envid, struct Env **penv, int checkperm);
 void env_run(struct Env *e) __attribute__((noreturn));
 

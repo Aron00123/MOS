@@ -65,6 +65,26 @@ int syscall_cgetc() {
 	return msyscall(SYS_cgetc);
 }
 
+int syscall_is_monitor_activer() {
+    return msyscall(SYS_is_monitor_activer);
+}
+
+int syscall_is_done(u_int env_id) {
+    return msyscall(SYS_is_done, env_id);
+}
+
+int syscall_add_monitor(u_int env_id, char *str) {
+    return msyscall(SYS_add_monitor, env_id, str);
+}
+
+u_int syscall_get_monitor_id(u_int env_id) {
+    return msyscall(SYS_get_monitor_id, env_id);
+}
+
+void syscall_kill_job(int job_id) {
+    return msyscall(SYS_kill_job, job_id);
+}
+
 int syscall_write_dev(void *va, u_int dev, u_int size) {
 	/* Exercise 5.2: Your code here. (1/2) */
     return msyscall(SYS_write_dev, va, dev, size);

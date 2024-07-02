@@ -8,6 +8,11 @@
 
 struct Env envs[NENV] __attribute__((aligned(PAGE_SIZE))); // All environments
 
+u_int monitor_ids[16];
+char monitor_str[16][1024];
+u_int monitor_status[16]; // 0 Running, 1 Done
+
+
 struct Env *curenv = NULL;	      // the current env
 static struct Env_list env_free_list; // Free list
 
@@ -502,6 +507,45 @@ void env_run(struct Env *e) {
 	/* Exercise 3.8: Your code here. (2/2) */
     env_pop_tf(&curenv->env_tf, curenv->env_asid);
 
+}
+
+int change_monitor() {
+    for (int i = 0; i < 16; i++) {
+        if (monitor_ids[i] == curenv->env_id) {
+            monitor_status[i] = 1;
+            return 0;
+        }
+    }
+    return 0;
+}
+
+int is_monitor_done(u_int env_id) {
+    if (monitor_ids[env_id] == 0) {
+        return -1;
+    }
+    return monitor_status[env_id];
+}
+
+int add_monitor(u_int env_id, char* str) {
+    for (int i = 0; i < 16; i++) {
+        if (monitor_ids[i] == 0) {
+            monitor_ids[i] = env_id;
+            strcpy(monitor_str[i], str);
+            monitor_status[i] = 0;
+            return 0;
+        }
+    }
+    return -1;
+}
+
+u_int get_monitor_id(u_int env_id) {
+    return monitor_ids[env_id];
+}
+
+void kill_job(int job_id) {
+    struct Env *job_env ;
+    monitor_status[job_id - 1] = 1;
+    job_env = envid2env(monitor_ids[job_id - 1], &job_env, 0);
 }
 
 void env_check() {

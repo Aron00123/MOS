@@ -27,16 +27,29 @@ struct Dev devfile = {
 //  the underlying error on failure.
 int open(const char *path, int mode) {
 	int r;
-
 	// Step 1: Alloc a new 'Fd' using 'fd_alloc' in fd.c.
 	// Hint: return the error code if failed.
 	struct Fd *fd;
 	/* Exercise 5.9: Your code here. (1/5) */
     try(fd_alloc(&fd));
+    // debugf("fd is: %d\n", fd);
+    // debugf("1111111111\n");
 
 	// Step 2: Prepare the 'fd' using 'fsipc_open' in fsipc.c.
 	/* Exercise 5.9: Your code here. (2/5) */
-    try(fsipc_open(path, mode, fd));
+    // try(fsipc_open(path, mode, fd));
+    // debugf("mode is %d\n", mode);
+	
+        // debugf("here!!!\n");
+		try(fsipc_open(path, mode, fd));
+	
+    // else {
+	// 	mode &= ~O_CREAT;
+    //     // debugf("here!!!\n");
+    //     // debugf("F_TYPE is %d\n", mode);
+    //     return fsipc_create(path, mode, fd); // mode is f_type
+	// }
+    // debugf("1111111111\n");
 
 	// Step 3: Set 'va' to the address of the page where the 'fd''s data is cached, using
 	// 'fd2data'. Set 'size' and 'fileid' correctly with the value in 'fd' as a 'Filefd'.
@@ -48,6 +61,7 @@ int open(const char *path, int mode) {
 	ffd = (struct Filefd *)fd;
 	size = ffd->f_file.f_size;
 	fileid = ffd->f_fileid;
+    // debugf("1111111111\n");
 
 	// Step 4: Map the file content using 'fsipc_map'.
 	for (int i = 0; i < size; i += PTMAP) {
@@ -55,11 +69,26 @@ int open(const char *path, int mode) {
         try(fsipc_map(fileid, i, va + i));
 
 	}
+    // debugf("1111111111\n");
 
 	// Step 5: Return the number of file descriptor using 'fd2num'.
 	/* Exercise 5.9: Your code here. (5/5) */
     return fd2num(fd);
 
+}
+
+int create(const char *path, int mode) {
+    int r;
+	// Step 1: Alloc a new 'Fd' using 'fd_alloc' in fd.c.
+	// Hint: return the error code if failed.
+	struct Fd *fd;
+	/* Exercise 5.9: Your code here. (1/5) */
+    try(fd_alloc(&fd));
+    // debugf("fd is: %d\n", fd);
+    mode &= ~O_CREAT;
+    // debugf("here!!!\n");
+    // debugf("F_TYPE is %d\n", mode);
+    return fsipc_create(path, mode, fd); // mode is f_type
 }
 
 // Overview:
@@ -249,6 +278,17 @@ int ftruncate(int fdnum, u_int size) {
 	return 0;
 }
 
+
+// A simple function to concatenate strings safely
+void my_strcat(char *dest, const char *src) {
+    while (*dest) {
+        dest++;
+    }
+    while ((*dest++ = *src++)) {
+        ;
+    }
+}
+
 // Overview:
 //  Delete a file or directory.
 int remove(const char *path) {
@@ -256,11 +296,57 @@ int remove(const char *path) {
 
 	/* Exercise 5.13: Your code here. */
     return fsipc_remove(path);
+    
 
 }
+
+// int file_remove(char *path) {
+//     int r;
+//     struct File *f;
+
+//     // Step 1: find the file on the disk.
+//     if ((r = walk_path(path, 0, &f, 0)) < 0) {
+//         return r;
+//     }
+
+//     // Step 2: if it is a directory, recursively remove its contents.
+//     if (f->f_type == FTYPE_DIR) {
+//         struct File *files[65536];
+//         int file_count, i;
+
+//         // List directory contents
+//         if ((r = list_directory(f, files, &file_count)) < 0) {
+//             return r;
+//         }
+
+//         // Recursively remove each file in the directory
+//         for (i = 0; i < file_count; i++) {
+//             char sub_path[MAXPATHLEN];
+//             int _r = my_custom_snprintf(sub_path, sizeof(sub_path), "%s/%s", path, files[i]->f_name);
+//             if ((r = file_remove(sub_path)) < 0) {
+//                 return r;
+//             }
+//         }
+//     }
+
+//     // Step 3: truncate its size to zero.
+//     file_truncate(f, 0);
+
+//     // Step 4: clear its name.
+//     f->f_name[0] = '\0';
+
+//     // Step 5: flush the file.
+//     file_flush(f);
+//     if (f->f_dir) {
+//         file_flush(f->f_dir);
+//     }
+
+//     return 0;
+// }
 
 // Overview:
 //  Synchronize disk with buffer cache
 int sync(void) {
 	return fsipc_sync();
 }
+
